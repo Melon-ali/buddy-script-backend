@@ -59,6 +59,7 @@ model Post {
   authorId   String     @db.ObjectId
   content    String?
   imageUrl   String?
+  likeCount  Int        @default(0)
   visibility Visibility @default(PUBLIC)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt

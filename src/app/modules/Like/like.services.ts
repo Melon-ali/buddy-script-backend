@@ -4,24 +4,24 @@ import ApiError from "../../../errors/ApiErrors";
 import { JwtPayload } from "jsonwebtoken";
 import { notificationService } from "../Notification/Notification.service";
 
-const likeCourse = async (id: string, user: any) => {
+const likePost = async (id: string, user: any) => {
   const prismaTransaction = await prisma.$transaction(async (prisma) => {
     // Check if the course exists
-    const isCourseExist = await prisma.courses.findUnique({
+    const isPostExist = await prisma.post.findUnique({
       where: {
         id: id,
       },
     });
 
-    if (!isCourseExist) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
+    if (!isPostExist) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Post not found");
     }
 
     // Check if the like already exists
     const existingLike = await prisma.like.findFirst({
       where: {
         userId: user.id,
-        courseId: id,
+        postId: id,
       },
     });
 
@@ -31,19 +31,19 @@ const likeCourse = async (id: string, user: any) => {
       // - Throw an error
       // - Return a message
       // Here, we'll throw an error:
-      throw new ApiError(httpStatus.BAD_REQUEST, "Course already liked");
+      throw new ApiError(httpStatus.BAD_REQUEST, "Post already liked");
     }
 
     // Create the like
     const result = await prisma.like.create({
       data: {
         userId: user.id,
-        courseId: id,
+        postId: id,
       },
     });
 
     // Increment like count
-    await prisma.courses.update({
+    await prisma.post.update({
       where: {
         id: id,
       },
@@ -79,7 +79,7 @@ const likeCourse = async (id: string, user: any) => {
 
 
 const unlike = async (id: string, user: any) => {
-  const isPostExist = await prisma.courses.findUnique({
+  const isPostExist = await prisma.post.findUnique({
     where: { id },
   });
 
@@ -90,7 +90,7 @@ const unlike = async (id: string, user: any) => {
   const existingLike = await prisma.like.findFirst({
     where: {
       userId: user.id,
-      courseId: id,
+      postId: id,
     },
   });
 
@@ -102,7 +102,7 @@ const unlike = async (id: string, user: any) => {
     where: { id: existingLike.id },
   });
 
-  await prisma.courses.update({
+  await prisma.post.update({
     where: { id },
     data: {
       likeCount: {
@@ -126,39 +126,20 @@ const getAllMyLikeIds = async (user: JwtPayload) => {
       userId: user.id,
     },
     select: {
-      course: {
+      post: {
         select: {
           id: true,
-          name: true,
-          description: true,
-          thumbnailUrl: true,
-          user: {
-            select: {
-              id: true,
-              username: true,
-            },
-          },
+          imageUrl: true,
         },
       },
     },
   });
 
-  const likedCourses = result.map((like) => ({
-    id: like.course.id,
-    title: like.course.name,
-    description: like.course.description,
-    thumbnailUrl: like.course.thumbnailUrl,
-    teacher: {
-      id: like.course.user.id,
-      username: like.course.user.username,
-    },
-  }));
-
-  return likedCourses;
+  return result;
 };
 
 export const LikeService = {
-  likeCourse,
+  likePost,
   getAllMyLikeIds,
   unlike,
 };

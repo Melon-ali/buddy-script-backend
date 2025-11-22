@@ -6,23 +6,11 @@ import { likeController } from "./like.controller";
 
 const router = Router();
 
-router.post(
-  "/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.TEACHER),
-  likeController.toggleLike
-);
+router.post("/:id", auth(), likeController.toggleLike);
 // get all my like id
 
-router.get(
-  "/",
-  auth(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.TEACHER),
-  likeController.getAllMyLikeIds
-);
+router.get("/", auth(), likeController.getAllMyLikeIds);
 
-router.delete(
-  "/unlike/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.TEACHER),
-  likeController.unlike
-);
+router.delete("/unlike/:id", auth(), likeController.unlike);
 
 export const LikeRouter = router;

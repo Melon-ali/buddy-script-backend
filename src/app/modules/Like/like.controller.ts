@@ -6,7 +6,7 @@ import { LikeService } from "./like.services";
 const toggleLike = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = req.user;
-  const result = await LikeService.likeCourse(id, user);
+  const result = await LikeService.likePost(id, user);
   sendResponse(res, {
     success: true,
     statusCode: 200,
