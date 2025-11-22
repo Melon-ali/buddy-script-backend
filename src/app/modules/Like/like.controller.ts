@@ -43,8 +43,24 @@ const getAllMyLikeIds = catchAsync(async (req, res) => {
   });
 });
 
+const toggleLikes = catchAsync(async (req, res) => {
+  const postId = req.params.id;
+  const user = req.user;
+
+  const result = await LikeService.toggleLikes(postId, user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: result.message,
+    data: result,
+  });
+});
+
+
 export const likeController = {
   toggleLike,
   getAllMyLikeIds,
-  unlike
+  unlike,
+  toggleLikes,
 };

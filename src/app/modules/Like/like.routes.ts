@@ -7,6 +7,8 @@ import { likeController } from "./like.controller";
 const router = Router();
 
 router.post("/:id", auth(), likeController.toggleLike);
+
+router.patch("/:id", auth(), likeController.toggleLikes);
 // get all my like id
 
 router.get("/", auth(), likeController.getAllMyLikeIds);

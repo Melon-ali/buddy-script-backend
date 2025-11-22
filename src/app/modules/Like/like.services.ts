@@ -138,8 +138,80 @@ const getAllMyLikeIds = async (user: JwtPayload) => {
   return result;
 };
 
+const toggleLikes = async (postId: string, user: any) => {
+  return await prisma.$transaction(async (tx) => {
+    // ---------- Step 1: Check post ----------
+    const existingPost = await tx.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Post not found");
+    }
+
+    // ---------- Step 2: Check if user already liked ----------
+    const existingLike = await tx.like.findFirst({
+      where: {
+        userId: user.id,
+        postId,
+      },
+    });
+
+    // =============== UNLIKE LOGIC ===============
+    if (existingLike) {
+      await tx.like.delete({
+        where: { id: existingLike.id },
+      });
+
+      await tx.post.update({
+        where: { id: postId },
+        data: {
+          likeCount: { decrement: 1 },
+        },
+      });
+
+      return {
+        isLiked: false,
+        message: "Unliked successfully",
+      };
+    }
+
+    // =============== LIKE LOGIC ===============
+    await tx.like.create({
+      data: {
+        userId: user.id,
+        postId,
+      },
+    });
+
+    await tx.post.update({
+      where: { id: postId },
+      data: {
+        likeCount: { increment: 1 },
+      },
+    });
+
+    // Optional: send notification to post author
+    if (user.fcmToken) {
+      await notificationService.sendNotification(
+        user.fcmToken,
+        "You liked a post",
+        "Post like added",
+        user.id
+      );
+    }
+
+    return {
+      isLiked: true,
+      message: "Liked successfully",
+    };
+  });
+};
+
+
 export const LikeService = {
   likePost,
   getAllMyLikeIds,
   unlike,
+  toggleLikes,
 };
