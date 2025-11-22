@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ======================
+ * USER MODEL
+ * =======================
+ */
+model User {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  email          String     @unique
+  firstName      String     @default("")
+  lastName       String     @default("")
+  username       String     @default("")
+  phoneNumber    String     @default("")
+  password       String     @default("")
+  region         String     @default("")
+  country        String     @default("")
+  role           UserRole   @default(USER)
+  userStatus     UserStatus @default(ACTIVE)
+  fcmToken       String?    @default("")
+  dob            DateTime?
+  profileImage   String     @default("")
+  profileUrl     String?
+  expirationOtp  DateTime?
+  otp            Int?
+  isNotification Boolean    @default(true)
+  status         UserStatus @default(ACTIVE)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  notifications Notification[] @relation("UserRelation")
+  likes         Like[]         @relation("UserLikes")
+  posts         Post[]         @relation("UserPosts")
+  comments      Comment[]      @relation("UserComments")
+
+  roomUsers     RoomUser[]
+  chatsSent     Chat[]     @relation("ChatsSent")
+  chatsReceived Chat[]     @relation("ChatsReceived")
+  roomsSent     Room[]     @relation("RoomsSent")
+  roomsReceived Room[]     @relation("RoomsReceived")
+
+  @@map("users")
+}
+
+/**
+ * ======================
+ * POSTS
+ * =======================
+ */
+model Post {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  authorId   String     @db.ObjectId
+  content    String?
+  imageUrl   String?
+  visibility Visibility @default(PUBLIC)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  author   User?     @relation("UserPosts", fields: [authorId], references: [id])
+  comments Comment[] @relation("PostComments")
+  likes    Like[]    @relation("PostLikes")
+
+  @@map("posts")
+}
+
+/**
+ * ======================
+ * COMMENTS
+ * =======================
+ */
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  authorId  String   @db.ObjectId
+  parentId  String?  @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post   Post? @relation("PostComments", fields: [postId], references: [id])
+  author User? @relation("UserComments", fields: [authorId], references: [id])
+
+  // SELF-RELATION FIX
+  replies Comment[] @relation("CommentReplies") // ← remove onDelete/onUpdate here
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  likes Like[]
+
+  @@map("comments")
+}
+
+/**
+ * ======================
+ * LIKE
+ * =======================
+ */
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String?  @db.ObjectId
+  commentId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  user    User?    @relation("UserLikes", fields: [userId], references: [id])
+  post    Post?    @relation("PostLikes", fields: [postId], references: [id])
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("likes")
+}
+
+/**
+ * ======================
+ * NOTIFICATION
+ * =======================
+ */
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  title     String
+  body      String
+  data      String?  @default("")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("UserRelation", fields: [userId], references: [id], onDelete: NoAction)
+
+  @@map("notifications")
+}
+
+/**
+ * ======================
+ * ROOM USER
+ * =======================
+ */
+model RoomUser {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  roomId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@unique([userId, roomId])
+  @@map("room_users")
+}
+
+/**
+ * ======================
+ * CHAT
+ * =======================
+ */
+model Chat {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String?  @db.ObjectId
+  receiverId String?  @db.ObjectId
+  message    String?
+  roomId     String   @db.ObjectId
+  timerId    String?  @db.ObjectId
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sender   User? @relation("ChatsSent", fields: [senderId], references: [id])
+  receiver User? @relation("ChatsReceived", fields: [receiverId], references: [id])
+  room     Room? @relation(fields: [roomId], references: [id])
+
+  @@map("chats")
+}
+
+/**
+ * ======================
+ * ROOM
+ * =======================
+ */
+model Room {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  type       RoomType @default(GROUP)
+  name       String?
+  senderId   String?  @db.ObjectId
+  receiverId String?  @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sender   User? @relation("RoomsSent", fields: [senderId], references: [id])
+  receiver User? @relation("RoomsReceived", fields: [receiverId], references: [id])
+
+  chat     Chat[]
+  RoomUser RoomUser[]
+
+  @@map("rooms")
+}
+
+/**
+ * ======================
+ * ENUMS
+ * =======================
+ */
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum UserRole {
+  ADMIN
+  SUPER_ADMIN
+  USER
+}
+
+enum CourseStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum RoomType {
+  PRIVATE
+  GROUP
+}
