@@ -1,7 +1,47 @@
+import httpStatus from "http-status";
 import prisma from "../../../shared/prisma";
+import ApiError from "../../../errors/ApiErrors";
+
 
 const createIntoDb = async (data: any) => {
-  const result = await prisma.comment.create({ data });
+  const { postId, parentId } = data;
+
+  // Check if post exists
+  const isPostExist = await prisma.post.findUnique({
+    where: { id: postId },
+  });
+
+  if (!isPostExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Post not found");
+  }
+
+  // If parentId is provided → this is a reply
+  if (parentId) {
+    const parentComment = await prisma.comment.findUnique({
+      where: { id: parentId },
+    });
+
+    if (!parentComment) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Parent comment not found");
+    }
+
+    // Validate: parent comment belongs to the same post
+    if (parentComment.postId !== postId) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Reply must be on the same post"
+      );
+    }
+  }
+
+  // Create comment or reply
+  const result = await prisma.comment.create({
+    data,
+    include: {
+      author: true, // optional
+    },
+  });
+
   return result;
 };
 
@@ -27,12 +67,17 @@ const updateIntoDb = async (id: string, data: any) => {
 };
 
 const deleteItemFromDb = async (id: string) => {
-  const deletedItem = await prisma.comment.delete({
+  // 1. delete child replies first
+  await prisma.comment.deleteMany({
+    where: { parentId: id },
+  });
+
+  // 2. delete the parent comment
+  const deleted = await prisma.comment.delete({
     where: { id },
   });
 
-  // Add any additional logic if necessary, e.g., cascading deletes
-  return deletedItem;
+  return deleted;
 };
 export const CommentService = {
   createIntoDb,
