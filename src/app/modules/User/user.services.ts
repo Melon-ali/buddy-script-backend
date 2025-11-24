@@ -44,10 +44,8 @@ const createUserIntoDb = async (payload: User) => {
     select: {
       id: true,
       username: true,
-      firstName: true,
-      lastName: true,
       email: true,
-      profileImage: true,
+      image: true,
       role: true,
       status: true,
       phoneNumber: true,
@@ -127,7 +125,7 @@ const getUsersFromDb = async (
       id: true,
       username: true,
       email: true,
-      profileImage: true,
+      image: true,
       role: true,
       phoneNumber: true,
       isNotification: true,
@@ -157,9 +155,15 @@ const updateProfile = async (req: Request) => {
   const stringData = req.body.text;
   let image;
   let parseData;
+
+  const userId = req.user && (req.user as any).id;
+  if (!userId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "User not authenticated");
+  }
+
   const existingUser = await prisma.user.findFirst({
     where: {
-      id: req.user.id,
+      id: userId,
     },
   });
   if (!existingUser) {
@@ -178,21 +182,17 @@ const updateProfile = async (req: Request) => {
     },
     data: {
       username: parseData.username || existingUser.username,
-      firstName: parseData.firstName || existingUser.firstName,
-      lastName: parseData.lastName || existingUser.lastName,
       dob: parseData.dob || existingUser.dob,
       email: parseData.email || existingUser.email,
-      profileImage: image || existingUser.profileImage,
+      image: image || existingUser.image,
       phoneNumber: parseData.phoneNumber || existingUser.phoneNumber, // ✅
       updatedAt: new Date(),
     },
     select: {
       id: true,
       username: true,
-      firstName: true,
-      lastName: true,
       email: true,
-      profileImage: true,
+      image: true,
       dob: true,
       phoneNumber: true,
       isNotification: true,
@@ -220,10 +220,8 @@ const updateUserIntoDb = async (payload: IUser, id: string) => {
     select: {
       id: true,
       username: true,
-      firstName: true,
-      lastName: true,
       email: true,
-      profileImage: true,
+      image: true,
       role: true,
       phoneNumber: true,
       isNotification: true,
@@ -296,7 +294,7 @@ const deleteUserFromDb = async (id: string) => {
     );
 
   return result;
-}
+};
 
 export const userService = {
   createUserIntoDb,

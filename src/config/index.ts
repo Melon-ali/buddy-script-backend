@@ -5,6 +5,10 @@ dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 export default {
   env: process.env.NODE_ENV,
+  google_client_id: process.env.GOOGLE_CLIENT_ID,
+  google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
+  call_back_url: process.env.CALL_BACK_URL,
+  frontend_url: process.env.FRONTEND_URL,
   stripe_key: process.env.STRIPE_SECRET_KEY,
   port: process.env.PORT,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
@@ -25,5 +29,8 @@ export default {
     api_key: process.env.BREVO_API_KEY,
     email: process.env.BREVO_EMAIL,
     sender_name: process.env.BREVO_SENDER_NAME,
+  },
+  password: {
+    password_salt: process.env.BCRYPT_SALT_ROUNDS,
   },
 };

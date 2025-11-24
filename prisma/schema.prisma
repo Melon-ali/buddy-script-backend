@@ -15,8 +15,6 @@ datasource db {
 model User {
   id             String     @id @default(auto()) @map("_id") @db.ObjectId
   email          String     @unique
-  firstName      String     @default("")
-  lastName       String     @default("")
   username       String     @default("")
   phoneNumber    String     @default("")
   password       String     @default("")
@@ -26,14 +24,15 @@ model User {
   userStatus     UserStatus @default(ACTIVE)
   fcmToken       String?    @default("")
   dob            DateTime?
-  profileImage   String     @default("")
-  profileUrl     String?
+  image          String     @default("")
   expirationOtp  DateTime?
   otp            Int?
   isNotification Boolean    @default(true)
   status         UserStatus @default(ACTIVE)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  isGoogleAuth   Boolean    @default(false)
+  lastLogin      DateTime?  @default(now())
 
   notifications Notification[] @relation("UserRelation")
   likes         Like[]         @relation("UserLikes")

@@ -71,7 +71,7 @@ const getMyProfile = async (userToken: string) => {
       id: true,
       username: true,
       email: true,
-      profileImage: true,
+      image: true,
       isNotification: true,
       fcmToken: true,
       dob: true,
