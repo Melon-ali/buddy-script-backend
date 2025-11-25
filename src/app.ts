@@ -10,7 +10,7 @@ import router from "./app/routes";
 
 const app: Application = express();
 export const corsOptions = {
-  origin: ["http://localhost:3001", "https://nanabismark1116.vercel.app", "http://localhost:3000"],
+  origin: ["http://localhost:3001", "https://buddy-script-client-rust.vercel.app", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

@@ -47,7 +47,8 @@ const getNotificationByUserIdController = catchAsync(async (req: Request, res: R
 });
 
 const readNotificationByUserIdController = catchAsync(async (req: Request, res: Response) => {
-  const  userId  = req.user?.id;
+  const user = req.user as any;
+  const userId = user?.id || user?._id;
   const notifications = await notificationService.readNotificationByUserId(userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,

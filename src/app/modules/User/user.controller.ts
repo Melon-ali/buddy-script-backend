@@ -72,8 +72,8 @@ const restictedUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const changeNotificationStatus = catchAsync(
-  async (req: Request, res: Response) => {
-    const userId = req.user.id;
+  async (req: Request & { user?: any }, res: Response) => {
+    const userId = req.user?.id;
 
     const updatedUser = await userService.changeNotificationStatus(userId);
 

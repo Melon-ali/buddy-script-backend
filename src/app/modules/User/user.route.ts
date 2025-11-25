@@ -15,7 +15,7 @@ router.post(
   userController.createUser
 );
 // *!get all  user
-router.get("/", auth(UserRole.SUPER_ADMIN, UserRole.USER), userController.getUsers);
+router.get("/", auth(), userController.getUsers);
 
 // *!profile user
 router.put(

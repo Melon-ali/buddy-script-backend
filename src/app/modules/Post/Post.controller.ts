@@ -5,7 +5,7 @@ import { PostService } from "./Post.service";
 import { Request, Response } from "express";
 
 const createPost = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.id;
+  const userId = (req.user as { id?: string })?.id;
   const reqBody = req.body;
 
   const result = await PostService.createIntoDb({
@@ -60,7 +60,17 @@ const updatePost = catchAsync(async (req: Request, res: Response) => {
 
 const deletePost = catchAsync(async (req: Request, res: Response) => {
   const postId = req.params.id;
-  const userId = req.user?.id;
+  const userId = (req.user as { id?: string })?.id;
+
+  if (!userId) {
+    sendResponse(res, {
+      statusCode: httpStatus.UNAUTHORIZED,
+      success: false,
+      message: "User not authenticated",
+      data: null,
+    });
+    return;
+  }
 
   const result = await PostService.deleteItemFromDb({ postId, userId });
 
