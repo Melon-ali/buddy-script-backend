@@ -59,6 +59,7 @@ const getListFromDb = async () => {
       visibility: true,
       createdAt: true,
       updatedAt: true,
+      comments: true,
       
       // counts from your model
       commentCount: true,
@@ -141,31 +142,37 @@ const updateIntoDb = async ({ postId, reqBody, files }: IPostUpdateParams) => {
   return updatedPost;
 };
 
-const deleteItemFromDb = async ({ postId, userId }: IDeletePostParams) => {
-  // ✅ Step 1: Check if post exists
+const deleteItemFromDb = async (id: string) => {
+  // Step 1: Check if post exists
   const existingPost = await prisma.post.findUnique({
-    where: { id: postId },
+    where: { id },
   });
 
   if (!existingPost) {
     throw new ApiError(httpStatus.NOT_FOUND, "Post not found");
   }
 
-  // ✅ Step 2: Check if logged-in user is the author
-  if (existingPost.authorId !== userId) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You are not allowed to delete this post."
-    );
-  }
-
-  // ✅ Step 3: Delete post
-  const deletedPost = await prisma.post.delete({
-    where: { id: postId },
+  // Step 2: Delete all comments under this post (including replies)
+  await prisma.comment.deleteMany({
+    where: { postId: id },
   });
 
-  return deletedPost;
+  // Step 3: Delete all likes under this post
+  await prisma.like.deleteMany({
+    where: { postId: id },
+  });
+
+  // Step 4: Delete the post itself
+  const deletedPost = await prisma.post.delete({
+    where: { id },
+  });
+
+  return {
+    message: "Post deleted successfully",
+    deletedPost,
+  };
 };
+
 export const PostService = {
   createIntoDb,
   getListFromDb,
