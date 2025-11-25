@@ -3,6 +3,7 @@ import config from "./config";
 import cron from "node-cron";
 import prisma from "./shared/prisma";
 import app from "./app";
+import cors from "cors";
 import { setupWebSocket } from "./app/modules/WebSocket/web.socket";
 
 let server: Server;
@@ -15,6 +16,12 @@ async function startServer() {
     // console.log("WebSocket server is running");
   });
 }
+
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
 
 async function main() {
   await startServer();
