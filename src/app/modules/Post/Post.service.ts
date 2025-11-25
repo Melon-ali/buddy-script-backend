@@ -51,9 +51,33 @@ const createIntoDb = async ({ userId, reqBody, files }: IPostServiceParams) => {
 };
 
 const getListFromDb = async () => {
-  const result = await prisma.post.findMany();
+  const result = await prisma.post.findMany({
+    select: {
+      id: true,
+      content: true,
+      imageUrl: true,
+      visibility: true,
+      createdAt: true,
+      updatedAt: true,
+      
+      // counts from your model
+      commentCount: true,
+      likeCount: true,
+
+      // author basic info (optional)
+      author: {
+        select: {
+          id: true,
+          username: true,
+          image: true,
+        },
+      },
+    },
+  });
+
   return result;
 };
+
 
 const getByIdFromDb = async (id: string) => {
   const result = await prisma.post.findUnique({ where: { id } });

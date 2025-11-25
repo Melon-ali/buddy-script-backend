@@ -6,6 +6,9 @@ Buddy is a modern social networking web application designed for seamless user i
 
 ---
 
+- Client Side: [Buddy Script Client](https://buddy-script-client-rust.vercel.app)
+- Server Side: [Buddy Script Server](https://buddy-script-backend-ebon.vercel.app)
+
 
 ## Technology Stack
 The project leverages the following technologies:
@@ -83,7 +86,7 @@ The project leverages the following technologies:
  Here Is My Api Documentation: 
 
  https://documenter.getpostman.com/view/28428572/2sB3dJxrRz
- 
+
 
 ## Admin Credentials  
 
