@@ -39,6 +39,9 @@ router.put("/:id", userController.updateUser);
 // *!delete  user
 router.delete("/:id", auth(UserRole.SUPER_ADMIN), userController.deleteUserFromDb);
 
+// *!get user by id
+router.get("/:id", auth(), userController.getUserById);
+
 
 
 export const userRoutes = router;

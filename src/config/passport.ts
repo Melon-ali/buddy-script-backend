@@ -23,31 +23,43 @@ passport.use(
         const email = profile.emails?.[0].value;
         if (!email) return done(new Error("No email from Google"));
 
+        // Find existing user
         let user = await prisma.user.findUnique({ where: { email } });
 
+        // If user doesn't exist, create new user
         if (!user) {
           user = await prisma.user.create({
             data: {
               email,
+              username: profile.name?.givenName || "",
+              phoneNumber: "",          // default value
               password: await hashPassword("password"),
-              role: UserRole.USER, // Default USER
-              image: profile.photos?.[0]?.value,
+              role: UserRole.USER,      // Default USER
+              region: "",
+              country: "",
+              userStatus: "ACTIVE",
+              status: "ACTIVE",
+              fcmToken: "",
+              image: profile.photos?.[0]?.value || "",
               isGoogleAuth: true,
               lastLogin: new Date(),
+              // createdAt & updatedAt handled automatically
             },
           });
         } else {
+          // Update lastLogin for existing user
           user = await prisma.user.update({
             where: { id: user.id },
             data: { lastLogin: new Date() },
           });
         }
 
-        // ✅ safe user object (frontend এ পাঠানোর জন্য)
+        // Safe user object to send to frontend
         const safeUser = {
           id: user.id,
           email: user.email,
           role: user.role,
+          username: user.username,
           photo: user.image,
           userType: user.isGoogleAuth ? "GOOGLE" : "LOCAL",
         };
