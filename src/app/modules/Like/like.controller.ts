@@ -4,9 +4,9 @@ import sendResponse from "../../../shared/sendResponse";
 import { LikeService } from "./like.services";
 
 const toggleLike = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { postId } = req.body;
   const user = req.user;
-  const result = await LikeService.likePost(id, user);
+  const result = await LikeService.toggleLikes(postId, user);
   sendResponse(res, {
     success: true,
     statusCode: 200,

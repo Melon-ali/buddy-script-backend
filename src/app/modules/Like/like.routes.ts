@@ -8,7 +8,7 @@ const router = Router();
 
 router.post("/:id", auth(), likeController.toggleLike);
 
-router.patch("/:id", auth(), likeController.toggleLikes);
+router.patch("", auth(), likeController.toggleLike);
 // get all my like id
 
 router.get("/", auth(), likeController.getAllMyLikeIds);

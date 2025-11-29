@@ -11,7 +11,7 @@ import router from "./app/routes";
 const app: Application = express();
 export const corsOptions = {
   origin: ["http://localhost:3001", "https://buddy-script-client-rust.vercel.app", "http://localhost:3000"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
